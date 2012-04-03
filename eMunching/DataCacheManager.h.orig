@@ -1,0 +1,56 @@
+//
+//  DataCacheManager.h
+//  eMunching
+//
+//  Created by Andrew Green on 7/9/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+
+@interface DataCacheManager : NSObject 
+{
+    NSMutableArray *m_chefSpecails;
+    NSMutableArray *m_featuredDeals;
+    
+    NSMutableArray *m_menuItemGroup;
+
+    int m_chefSpecialsSynchCount;
+    int m_featuredDealsSynchCount;  
+    
+    NSMutableArray *m_menuItemsByGroup1;
+    NSMutableArray *m_menuItemsByGroup2;
+    
+    NSMutableArray *m_menuItemsByGroup1SynchStatus;
+    NSMutableArray *m_menuItemsByGroup2SynchStatus;
+    
+
+    NSMutableArray *m_myOrder;
+    
+    NSMutableArray *m_savedOrderGroup;
+    NSMutableArray *m_savedOrderGroupItems;
+}
+
+@property (nonatomic, retain) NSMutableArray *chefSpecials;
+@property (nonatomic, retain) NSMutableArray *featuredDeals;
+
+@property (nonatomic,retain ) NSMutableArray *menuItemGroup;
+
+@property (nonatomic, retain) NSMutableArray *menuItemsByGroup1;
+@property (nonatomic, retain) NSMutableArray *menuItemsByGroup2;
+
+@property (nonatomic, retain) NSMutableArray *myOrder;
+
+<<<<<<< HEAD
+@property (nonatomic, retain) NSMutableArray *savedOrderGroup;
+@property (nonatomic, retain) NSMutableArray *savedOrderGroupItems;
+
+
+=======
+- (void) initMenuItemsByGroup;
+>>>>>>> b0dfc62bce00cd2efc8bb1031cc40f2092e72ac1
+- (BOOL) getDealsSynchStatus: (int) selectedDeal;
+- (BOOL) getGroupsSynchStatus: (int) selectedType :(int) selectedGroup;
+
+@end
