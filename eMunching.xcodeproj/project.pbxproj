@@ -26,6 +26,7 @@
 		A86C42F614626F9C0054A1FA /* HotDealsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A86C42F214626F9C0054A1FA /* HotDealsViewController.m */; };
 		A86C42F714626F9C0054A1FA /* HotDealsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = A86C42F314626F9C0054A1FA /* HotDealsViewController.xib */; };
 		A87E855013FCD2C10075AC25 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A87E854F13FCD2C10075AC25 /* MessageUI.framework */; };
+		A8851825152B168500B407F1 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A8851824152B168500B407F1 /* Default@2x.png */; };
 		A88D659B14026E6A009016E8 /* MapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A88D659914026E6A009016E8 /* MapViewController.m */; };
 		A88D659C14026E6A009016E8 /* MapViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = A88D659A14026E6A009016E8 /* MapViewController.xib */; };
 		A88D659F14026E7F009016E8 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A88D659E14026E7F009016E8 /* MapKit.framework */; };
@@ -299,6 +300,7 @@
 		A86C42F214626F9C0054A1FA /* HotDealsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HotDealsViewController.m; sourceTree = "<group>"; };
 		A86C42F314626F9C0054A1FA /* HotDealsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HotDealsViewController.xib; sourceTree = "<group>"; };
 		A87E854F13FCD2C10075AC25 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
+		A8851824152B168500B407F1 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		A88D659814026E6A009016E8 /* MapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapViewController.h; sourceTree = "<group>"; };
 		A88D659914026E6A009016E8 /* MapViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MapViewController.m; sourceTree = "<group>"; };
 		A88D659A14026E6A009016E8 /* MapViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MapViewController.xib; sourceTree = "<group>"; };
@@ -403,7 +405,7 @@
 		AF1ECED613C8F795000A1D60 /* DataCacheManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataCacheManager.m; sourceTree = "<group>"; };
 		AF1ECED813C8FA0E000A1D60 /* Managers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Managers.h; sourceTree = "<group>"; };
 		AF1ECED913C8FAE5000A1D60 /* eMunchingConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eMunchingConstants.h; sourceTree = "<group>"; };
-		AF1ECEDB13C8FC40000A1D60 /* AllObjects.h */ = {isa = PBXFileReference; fileEncoding = 4; path = AllObjects.h; sourceTree = "<group>"; };
+		AF1ECEDB13C8FC40000A1D60 /* AllObjects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AllObjects.h; sourceTree = "<group>"; };
 		AF1ECEDC13C8FC40000A1D60 /* AllObjects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AllObjects.m; sourceTree = "<group>"; };
 		AF1ECEDE13C8FCCB000A1D60 /* Objects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Objects.h; sourceTree = "<group>"; };
 		AF24A80C13B5B5B600B1C046 /* Besito.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Besito.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -974,6 +976,7 @@
 				AF67523F13C89C520008FE93 /* icon@2x.png */,
 				AF67523D13C89B970008FE93 /* icon.png */,
 				A8AAD1F313FE3F46000B2032 /* Default.png */,
+				A8851824152B168500B407F1 /* Default@2x.png */,
 			);
 			name = "App Icons and Default";
 			path = ..;
@@ -1543,6 +1546,7 @@
 				A84748BC14693A2400943723 /* events_bg_brown@2x.png in Resources */,
 				A84748BD14693A2400943723 /* events_bg_white.png in Resources */,
 				A84748BE14693A2400943723 /* events_bg_white@2x.png in Resources */,
+				A8851825152B168500B407F1 /* Default@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
