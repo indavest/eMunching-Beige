@@ -198,7 +198,7 @@
 -(void) displayContactUs
 {
     NSLog(@"Clicked");
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Call Besito?" message:@"\n" delegate:self cancelButtonTitle:@"Cancel"  otherButtonTitles:@"OK", nil];
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:CALLUSTEXT message:@"\n" delegate:self cancelButtonTitle:@"Cancel"  otherButtonTitles:@"OK", nil];
     
     [alert show];
     [alert release];    
@@ -208,7 +208,7 @@
 {
     if (buttonIndex != [alertView cancelButtonIndex])
     {
-        NSString *phone_number = @"+918065703027";
+        NSString *phone_number = m_phoneNumber.text;
         NSString *phoneStr = [[NSString alloc] initWithFormat:@"tel:%@",phone_number];
         NSURL *phoneURL = [[NSURL alloc] initWithString:phoneStr];
         [[UIApplication sharedApplication] openURL:phoneURL];
@@ -223,7 +223,7 @@
     [composer setMailComposeDelegate:self];
     if ([MFMailComposeViewController canSendMail]) 
     {
-        [composer setToRecipients:[NSArray arrayWithObjects:@"support@besitorestaurant.com", nil]];
+        [composer setToRecipients:[NSArray arrayWithObjects:m_emailAddress.text, nil]];
         [composer setSubject:@"subject here"];
         [composer setMessageBody:@"message here" isHTML:NO];
         [composer setModalTransitionStyle:UIModalTransitionStyleCrossDissolve];
