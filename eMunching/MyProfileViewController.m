@@ -10,12 +10,14 @@
 #import "ModalUIPickerViewController.h"
 #import "Objects.h"
 #import "Reachability.h"
+#import "SecurityWrapper.h"
 
 @interface MyProfileViewController (PrivateMethods)
 
 - (void) uiPickerPopUpDisplay;
 - (void) animatePickerUp;
 - (void) animatePickerDown;
+- (void) getSaltByUserId;
 
 @end
 
@@ -43,10 +45,13 @@
 @synthesize changedPhoneNo        = m_changedPhoneNo;
 @synthesize changedLocation       = m_changedLocation;
 
-@synthesize fetchedResults          = m_fetchedResults;
-@synthesize workingPropertyString   = m_workingPropertyString;
-@synthesize storingCharacterData    = m_storingCharacterData;
-@synthesize profileStatusString     = m_profileStatusString;
+@synthesize fetchedResults           = m_fetchedResults;
+@synthesize saltStringFetchedResults = m_saltStringFetchedResults;
+@synthesize workingPropertyString    = m_workingPropertyString;
+@synthesize storingCharacterData     = m_storingCharacterData;
+@synthesize storingCharacterData1    = m_storingCharacterData1;
+@synthesize profileStatusString      = m_profileStatusString;
+@synthesize fetchedSaltString        = m_fetchedSaltString;
 
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -88,6 +93,8 @@
                              initWithTitle:@"Update" style:UIBarButtonItemStylePlain target:self action:@selector(Save:)]; 
     
     self.navigationItem.rightBarButtonItem = submit;
+    
+    [self getSaltByUserId];//Call to get Salt 
     
     //Set colors from templates
     [self.view setBackgroundColor:BACKGROUNDCOLOR];
@@ -137,8 +144,68 @@
     [[GANTracker sharedTracker] trackPageview:@"MyProfile" withError:&error];
 }
 
--(void)updateProfile
+- (void)getSaltByUserId
 {
+    m_serverCallMode = @"SaltString";
+    
+    Reachability *reachability = [Reachability reachabilityForInternetConnection];  
+    NetworkStatus networkStatus = [reachability currentReachabilityStatus]; 
+    if (networkStatus == NotReachable)
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:@"Please check your data connection and try again" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];
+        [alert release];
+        
+        return;
+    }
+    
+    //Start an activity indicator before the data is loaded from server
+    m_activityIndicator =[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(20.0f, 20.0f, 40.0f, 40.0f)];
+    [m_activityIndicator setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    m_activityIndicator.center = self.view.center;
+    [self.view addSubview:m_activityIndicator];
+    [m_activityIndicator startAnimating];   
+    
+    NSString *emailId = [[ApplicationManager instance].dataCacheManager emailId];
+    
+    NSString *soapMessage = [NSString stringWithFormat:@"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+                             "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n"
+                             "<soap:Body>\n"
+                             "<GetUserByUserID xmlns=\"http://emunching.org/\">\n"
+                             "<UserName>eMunch</UserName>\n"
+                             "<PassWord>idnlgeah11</PassWord>\n"
+                             "<UserID>%@</UserID>\n"
+                             "</GetUserByUserID>\n"
+                             "</soap:Body>\n"
+                             "</soap:Envelope>\n",emailId];
+    
+    NSURL *url = [NSURL URLWithString:@"http://www.emunching.com/eMunchingServices.asmx"];
+    NSMutableURLRequest *theRequest = [NSMutableURLRequest requestWithURL:url];
+    NSString *msgLength = [NSString stringWithFormat:@"%d", [soapMessage length]];
+    
+    [theRequest addValue: @"text/xml; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
+    [theRequest addValue: @"http://emunching.org/GetUserByUserID" forHTTPHeaderField:@"SOAPAction"];
+    [theRequest addValue: msgLength forHTTPHeaderField:@"Content-Length"];
+    [theRequest setHTTPMethod:@"POST"];
+    [theRequest setHTTPBody: [soapMessage dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    NSURLConnection *theConnection = [[NSURLConnection alloc] initWithRequest:theRequest delegate:self];
+    
+    if( theConnection )
+    {
+        m_saltStringFetchedResults = [[NSMutableData data] retain];
+    }
+    else
+    {
+        NSLog(@"theConnection is NULL");
+    }    
+}
+
+
+- (void)updateProfile
+{
+    m_serverCallMode = @"UpdateProfile";
+    
     Reachability *reachability = [Reachability reachabilityForInternetConnection];  
     NetworkStatus networkStatus = [reachability currentReachabilityStatus]; 
     if (networkStatus == NotReachable)
@@ -163,6 +230,13 @@
         Location *prefLocation = [[ApplicationManager instance].dataCacheManager preferredLocation];
         locationID = [prefLocation locationId];
     }
+    NSLog(@"%@",m_fetchedSaltString);
+    NSLog(@"%@",m_changedPassword.text);
+    NSLog(@"%@",m_emailIdLabel.text);
+    
+    
+    NSString *m_encryptedPassword = [SecurityWrapper sha256:[NSString stringWithFormat:@"%@%@%@", m_emailIdLabel.text, m_fetchedSaltString, m_changedPassword.text]];
+     NSLog(@"%@",m_encryptedPassword);
     
     NSString *soapMessage =[NSString stringWithFormat:@"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
     "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n"
@@ -176,7 +250,7 @@
     "<Location>%@</Location>\n"
     "</UpdateProfile>\n"
     "</soap:Body>\n"
-    "</soap:Envelope>\n",m_emailIdLabel.text,m_changedPassword.text,m_changedPhoneNo.text,locationID];
+    "</soap:Envelope>\n",m_emailIdLabel.text,m_encryptedPassword,m_changedPhoneNo.text,locationID];
  
     NSURL *url = [NSURL URLWithString:@"http://www.emunching.com/eMunchingServices.asmx"];
     NSMutableURLRequest *theRequest = [NSMutableURLRequest requestWithURL:url];
@@ -203,41 +277,89 @@
 
 -(void) connection:(NSURLConnection *) connection 
 didReceiveResponse:(NSURLResponse *) response {
-    [m_fetchedResults setLength: 0];
+    
+    if([m_serverCallMode isEqualToString:@"SaltString"])
+    {
+        [m_saltStringFetchedResults setLength:0];
+    }
+    else if ([m_serverCallMode isEqualToString:@"UpdateProfile"])
+    {
+        [m_fetchedResults setLength: 0];
+    }
 }
 
 
 -(void) connection:(NSURLConnection *) connection 
     didReceiveData:(NSData *) data {
-    [m_fetchedResults appendData:data];
+    
+    if([m_serverCallMode isEqualToString:@"SaltString"])
+    {
+        [m_saltStringFetchedResults appendData:data];
+    }
+    else if ([m_serverCallMode isEqualToString:@"UpdateProfile"])
+    {    
+        [m_fetchedResults appendData:data];
+    }
 }
 
 -(void) connection:(NSURLConnection *) connection 
   didFailWithError:(NSError *) error {
-    [m_fetchedResults release];
-    [connection release];
+    if([m_serverCallMode isEqualToString:@"SaltString"])
+    {    
+        [m_saltStringFetchedResults release];
+        [connection release];
+    }
+    else if ([m_serverCallMode isEqualToString:@"UpdateProfile"])
+    {        
+        [m_fetchedResults release];   
+        [connection release];
+    }
 }
 
 -(void) connectionDidFinishLoading:(NSURLConnection *) connection {
     
-    NSLog(@"DONE. Received Bytes: %d", [m_fetchedResults length]);
-    
-    NSString *theXML = [[NSString alloc] 
-                        initWithBytes: [m_fetchedResults mutableBytes] 
-                        length:[m_fetchedResults length] 
-                        encoding:NSUTF8StringEncoding];
-    
-    //---shows the XML---
-    NSLog(@"%@",theXML);
-    
-    [theXML release];  
-    
-    NSXMLParser *parser = [[[NSXMLParser alloc] initWithData:m_fetchedResults]autorelease];
-	[parser setDelegate:self];
-    [parser parse];
-	
-    [connection release];
-    [m_fetchedResults release];
+    if([m_serverCallMode isEqualToString:@"SaltString"])
+    {
+        NSLog(@"DONE. Received Bytes: %d", [m_saltStringFetchedResults length]);
+        
+        NSString *theXML = [[NSString alloc] 
+                            initWithBytes: [m_saltStringFetchedResults mutableBytes] 
+                            length:[m_saltStringFetchedResults length] 
+                            encoding:NSUTF8StringEncoding];
+        
+        //---shows the XML---
+        NSLog(@"%@",theXML);
+        
+        [theXML release];  
+        
+        NSXMLParser *parser = [[[NSXMLParser alloc] initWithData:m_saltStringFetchedResults]autorelease];
+        [parser setDelegate:self];
+        [parser parse];
+        
+        [connection release];
+        [m_saltStringFetchedResults release];
+    }
+    else if ([m_serverCallMode isEqualToString:@"UpdateProfile"])
+    {    
+        NSLog(@"DONE. Received Bytes: %d", [m_fetchedResults length]);
+        
+        NSString *theXML = [[NSString alloc] 
+                            initWithBytes: [m_fetchedResults mutableBytes] 
+                            length:[m_fetchedResults length] 
+                            encoding:NSUTF8StringEncoding];
+        
+        //---shows the XML---
+        NSLog(@"%@",theXML);
+        
+        [theXML release];  
+        
+        NSXMLParser *parser = [[[NSXMLParser alloc] initWithData:m_fetchedResults]autorelease];
+        [parser setDelegate:self];
+        [parser parse];
+        
+        [connection release];
+        [m_fetchedResults release];
+    }
 }
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName
@@ -245,39 +367,74 @@ didReceiveResponse:(NSURLResponse *) response {
  qualifiedName:(NSString *)qName
     attributes:(NSDictionary *)attributeDict
 {
-    
-    if ([elementName isEqualToString:@"UpdateProfileResult"])
-	{
-        m_workingPropertyString = [[NSMutableString alloc] init];
-        m_storingCharacterData = YES;
+    if ([m_serverCallMode isEqualToString:@"SaltString"])
+    {
+        if ([elementName isEqualToString:@"Salt"])
+        {
+            m_workingPropertyString = [[NSMutableString alloc] init];
+            m_storingCharacterData = YES;
+        }
     }
-    
+    else if ([m_serverCallMode isEqualToString:@"UpdateProfile"])
+    {    
+        if ([elementName isEqualToString:@"UpdateProfileResult"])
+        {
+            m_workingPropertyString = [[NSMutableString alloc] init];
+            m_storingCharacterData1 = YES;
+        }
+    }    
 }
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName
   namespaceURI:(NSString *)namespaceURI
  qualifiedName:(NSString *)qName
-{
-    
-    if (m_storingCharacterData)
+{   
+    if ([m_serverCallMode isEqualToString:@"SaltString"])
     {
-        NSString *trimmedString = [m_workingPropertyString stringByTrimmingCharactersInSet:
-                                   [NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        [m_workingPropertyString setString:@""];  // clear the string for next time
-        if ([elementName isEqualToString:@"UpdateProfileResult"])
+        if(m_storingCharacterData)
         {
-            self.profileStatusString = trimmedString;
+            NSString *trimmedString = [m_workingPropertyString stringByTrimmingCharactersInSet:
+                                       [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            [m_workingPropertyString setString:@""];  // clear the string for next time
+            if ([elementName isEqualToString:@"Salt"])
+            {
+                self.fetchedSaltString = trimmedString;
+            } 
         }
-        
+    }
+   else if ([m_serverCallMode isEqualToString:@"UpdateProfile"])
+    {   
+        if (m_storingCharacterData1)
+        {
+            NSString *trimmedString = [m_workingPropertyString stringByTrimmingCharactersInSet:
+                                       [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            [m_workingPropertyString setString:@""];  // clear the string for next time
+            if ([elementName isEqualToString:@"UpdateProfileResult"])
+            {
+                self.profileStatusString = trimmedString;
+            }
+            
+        }
     }
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
 {
-    if (m_storingCharacterData)
+   
+    if ([m_serverCallMode isEqualToString:@"SaltString"])
     {
-        [m_workingPropertyString appendString:string];
+        if(m_storingCharacterData)
+        {
+            [m_workingPropertyString appendString:string];
+        }
     }
+    else if ([m_serverCallMode isEqualToString:@"UpdateProfile"])
+    {    
+        if (m_storingCharacterData1)
+        {
+            [m_workingPropertyString appendString:string];
+        }
+    }    
 }
 
 - (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError
@@ -290,6 +447,25 @@ didReceiveResponse:(NSURLResponse *) response {
 -(void)parserDidEndDocument:(NSXMLParser *)parser
 {
     
+    if ([m_serverCallMode isEqualToString:@"SaltString"])
+    {
+        [m_activityIndicator stopAnimating];
+        m_activityIndicator.hidden = YES;
+        [m_activityIndicator release];
+        
+        if([m_fetchedSaltString length])
+        {             
+            return;          
+        }
+        else
+        {
+            UIAlertView *fail = [[UIAlertView alloc] initWithTitle:@"Connection Error!" message:@"Please check your data connection and try again" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [fail show];
+            [fail release];
+        }
+    }
+    else if ([m_serverCallMode isEqualToString:@"UpdateProfile"])
+    {   
         int returnValue = [m_profileStatusString integerValue];
         
         bool status;
@@ -323,6 +499,7 @@ didReceiveResponse:(NSURLResponse *) response {
             [fail show];
             [fail release];
         }
+    }
 }
     
   

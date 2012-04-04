@@ -36,12 +36,16 @@
     
     
     NSMutableData           *m_fetchedResults;
+    NSMutableData           *m_saltStringFetchedResults;
     NSMutableString         *m_workingPropertyString;
     NSString                *m_profileStatusString;
+    NSString                *m_fetchedSaltString;    
     BOOL                    m_storingCharacterData;
+    BOOL                    m_storingCharacterData1;
     
     UIActivityIndicatorView *m_activityIndicator;
     
+    NSString *m_serverCallMode;   
 }
 
 @property (nonatomic,retain) IBOutlet UIScrollView  *scrollView;
@@ -66,8 +70,12 @@
 @property (nonatomic,retain) IBOutlet FontLabel   *changedLocation;
 
 @property (nonatomic, retain) NSMutableData     *fetchedResults;
+@property (nonatomic, retain) NSMutableData     *saltStringFetchedResults;
 @property (nonatomic, retain) NSMutableString   *workingPropertyString;
 @property (nonatomic ,retain) NSString          *profileStatusString;
+@property (nonatomic ,retain) NSString          *fetchedSaltString;
+
 @property (nonatomic, assign) BOOL              storingCharacterData;
+@property (nonatomic, assign) BOOL              storingCharacterData1;
 
 @end
