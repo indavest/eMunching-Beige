@@ -7,7 +7,7 @@
 //
 
 
-@class HomeViewController;
+@class DealsViewController;
 @class MenuViewController;
 @class MenuTypeViewController;
 

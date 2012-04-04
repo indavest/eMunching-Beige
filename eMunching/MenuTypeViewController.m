@@ -346,7 +346,10 @@ didReceiveResponse:(NSURLResponse *) response {
         
         if ([elementName isEqualToString:@"MenuItem"])
         {
-            [self.parsedMenuGroupItems addObject:self.menuItem];  
+            if ([self.menuItem isMenuItemOk])
+            {
+                [self.parsedMenuGroupItems addObject:self.menuItem];  
+            }
         }
     }
     

@@ -19,8 +19,8 @@
 		A84748BC14693A2400943723 /* events_bg_brown@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A84748B814693A2400943723 /* events_bg_brown@2x.png */; };
 		A84748BD14693A2400943723 /* events_bg_white.png in Resources */ = {isa = PBXBuildFile; fileRef = A84748B914693A2400943723 /* events_bg_white.png */; };
 		A84748BE14693A2400943723 /* events_bg_white@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A84748BA14693A2400943723 /* events_bg_white@2x.png */; };
-		A85E06D113FD623F00E4FED2 /* DealsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A85E06CF13FD623F00E4FED2 /* DealsViewController.m */; };
-		A85E06D213FD623F00E4FED2 /* DealsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = A85E06D013FD623F00E4FED2 /* DealsViewController.xib */; };
+		A85E06D113FD623F00E4FED2 /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A85E06CF13FD623F00E4FED2 /* HomeViewController.m */; };
+		A85E06D213FD623F00E4FED2 /* HomeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = A85E06D013FD623F00E4FED2 /* HomeViewController.xib */; };
 		A86C42F414626F9C0054A1FA /* HotDealsViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = A86C42EF14626F9B0054A1FA /* HotDealsViewCell.m */; };
 		A86C42F514626F9C0054A1FA /* HotDealsViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = A86C42F014626F9C0054A1FA /* HotDealsViewCell.xib */; };
 		A86C42F614626F9C0054A1FA /* HotDealsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A86C42F214626F9C0054A1FA /* HotDealsViewController.m */; };
@@ -98,8 +98,8 @@
 		A8F66A7C1462B11C0007EA68 /* RateView.m in Sources */ = {isa = PBXBuildFile; fileRef = A8F66A7B1462B11C0007EA68 /* RateView.m */; };
 		AF11F09D13C90DA3002FA85B /* PLSegmentCell.m in Sources */ = {isa = PBXBuildFile; fileRef = AF11F09A13C90DA3002FA85B /* PLSegmentCell.m */; };
 		AF11F09E13C90DA3002FA85B /* PLSegmentView.m in Sources */ = {isa = PBXBuildFile; fileRef = AF11F09C13C90DA3002FA85B /* PLSegmentView.m */; };
-		AF1ECEB313C8F2D3000A1D60 /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AF1ECEB113C8F2D3000A1D60 /* HomeViewController.m */; };
-		AF1ECEB413C8F2D3000A1D60 /* HomeView.xib in Resources */ = {isa = PBXBuildFile; fileRef = AF1ECEB213C8F2D3000A1D60 /* HomeView.xib */; };
+		AF1ECEB313C8F2D3000A1D60 /* DealsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AF1ECEB113C8F2D3000A1D60 /* DealsViewController.m */; };
+		AF1ECEB413C8F2D3000A1D60 /* DealsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = AF1ECEB213C8F2D3000A1D60 /* DealsView.xib */; };
 		AF1ECEBF13C8F525000A1D60 /* SpecialTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = AF1ECEBD13C8F525000A1D60 /* SpecialTableViewCell.m */; };
 		AF1ECEC013C8F525000A1D60 /* SpecialTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = AF1ECEBE13C8F525000A1D60 /* SpecialTableViewCell.xib */; };
 		AF1ECED413C8F72D000A1D60 /* ApplicationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AF1ECED313C8F72D000A1D60 /* ApplicationManager.m */; };
@@ -290,9 +290,9 @@
 		A84748B814693A2400943723 /* events_bg_brown@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "events_bg_brown@2x.png"; sourceTree = "<group>"; };
 		A84748B914693A2400943723 /* events_bg_white.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = events_bg_white.png; sourceTree = "<group>"; };
 		A84748BA14693A2400943723 /* events_bg_white@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "events_bg_white@2x.png"; sourceTree = "<group>"; };
-		A85E06CE13FD623E00E4FED2 /* DealsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DealsViewController.h; sourceTree = "<group>"; };
-		A85E06CF13FD623F00E4FED2 /* DealsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DealsViewController.m; sourceTree = "<group>"; };
-		A85E06D013FD623F00E4FED2 /* DealsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DealsViewController.xib; sourceTree = "<group>"; };
+		A85E06CE13FD623E00E4FED2 /* HomeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HomeViewController.h; sourceTree = "<group>"; };
+		A85E06CF13FD623F00E4FED2 /* HomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HomeViewController.m; sourceTree = "<group>"; };
+		A85E06D013FD623F00E4FED2 /* HomeViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HomeViewController.xib; sourceTree = "<group>"; };
 		A86C42EE14626F9B0054A1FA /* HotDealsViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HotDealsViewCell.h; sourceTree = "<group>"; };
 		A86C42EF14626F9B0054A1FA /* HotDealsViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HotDealsViewCell.m; sourceTree = "<group>"; };
 		A86C42F014626F9C0054A1FA /* HotDealsViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HotDealsViewCell.xib; sourceTree = "<group>"; };
@@ -393,9 +393,9 @@
 		AF11F09A13C90DA3002FA85B /* PLSegmentCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PLSegmentCell.m; sourceTree = "<group>"; };
 		AF11F09B13C90DA3002FA85B /* PLSegmentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PLSegmentView.h; sourceTree = "<group>"; };
 		AF11F09C13C90DA3002FA85B /* PLSegmentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PLSegmentView.m; sourceTree = "<group>"; };
-		AF1ECEB013C8F2D3000A1D60 /* HomeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HomeViewController.h; sourceTree = "<group>"; };
-		AF1ECEB113C8F2D3000A1D60 /* HomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HomeViewController.m; sourceTree = "<group>"; };
-		AF1ECEB213C8F2D3000A1D60 /* HomeView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HomeView.xib; sourceTree = "<group>"; };
+		AF1ECEB013C8F2D3000A1D60 /* DealsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; path = DealsViewController.h; sourceTree = "<group>"; };
+		AF1ECEB113C8F2D3000A1D60 /* DealsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DealsViewController.m; sourceTree = "<group>"; };
+		AF1ECEB213C8F2D3000A1D60 /* DealsView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DealsView.xib; sourceTree = "<group>"; };
 		AF1ECEBC13C8F525000A1D60 /* SpecialTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpecialTableViewCell.h; sourceTree = "<group>"; };
 		AF1ECEBD13C8F525000A1D60 /* SpecialTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpecialTableViewCell.m; sourceTree = "<group>"; };
 		AF1ECEBE13C8F525000A1D60 /* SpecialTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SpecialTableViewCell.xib; sourceTree = "<group>"; };
@@ -1061,10 +1061,10 @@
 		AF85751513CB2EA100A9501F /* Top Level */ = {
 			isa = PBXGroup;
 			children = (
-				A85E06CE13FD623E00E4FED2 /* DealsViewController.h */,
-				A85E06CF13FD623F00E4FED2 /* DealsViewController.m */,
-				AF1ECEB013C8F2D3000A1D60 /* HomeViewController.h */,
-				AF1ECEB113C8F2D3000A1D60 /* HomeViewController.m */,
+				A85E06CE13FD623E00E4FED2 /* HomeViewController.h */,
+				A85E06CF13FD623F00E4FED2 /* HomeViewController.m */,
+				AF1ECEB013C8F2D3000A1D60 /* DealsViewController.h */,
+				AF1ECEB113C8F2D3000A1D60 /* DealsViewController.m */,
 				AF24A82813B5B5B700B1C046 /* MenuViewController.h */,
 				AF24A82913B5B5B700B1C046 /* MenuViewController.m */,
 				AF67524E13C8A2BA0008FE93 /* ReservationsViewController.h */,
@@ -1082,8 +1082,8 @@
 		AF85751713CB2EB200A9501F /* Top Level */ = {
 			isa = PBXGroup;
 			children = (
-				A85E06D013FD623F00E4FED2 /* DealsViewController.xib */,
-				AF1ECEB213C8F2D3000A1D60 /* HomeView.xib */,
+				A85E06D013FD623F00E4FED2 /* HomeViewController.xib */,
+				AF1ECEB213C8F2D3000A1D60 /* DealsView.xib */,
 				AF24A82E13B5B5B700B1C046 /* MenuView.xib */,
 				AF67525013C8A2BA0008FE93 /* ReservationsView.xib */,
 				AF67525513C8A2D60008FE93 /* AboutUsView.xib */,
@@ -1381,7 +1381,7 @@
 				AF67525213C8A2BA0008FE93 /* ReservationsView.xib in Resources */,
 				AF67525713C8A2D60008FE93 /* AboutUsView.xib in Resources */,
 				AF67525C13C8A2E80008FE93 /* ContactUsView.xib in Resources */,
-				AF1ECEB413C8F2D3000A1D60 /* HomeView.xib in Resources */,
+				AF1ECEB413C8F2D3000A1D60 /* DealsView.xib in Resources */,
 				AF1ECEC013C8F525000A1D60 /* SpecialTableViewCell.xib in Resources */,
 				AF74F8A613CA41B20029496E /* TrajanPro-Bold.otf in Resources */,
 				AF74F8A713CA41B20029496E /* TrajanPro-Regular.otf in Resources */,
@@ -1392,7 +1392,7 @@
 				A83A831913FAA01E004BAF40 /* MenuTableViewCell.xib in Resources */,
 				A8D3DB0813FB9C0800A132BA /* AboutUsTableViewCell.xib in Resources */,
 				A8D3DB0D13FBBF4A00A132BA /* MyReviewViewController.xib in Resources */,
-				A85E06D213FD623F00E4FED2 /* DealsViewController.xib in Resources */,
+				A85E06D213FD623F00E4FED2 /* HomeViewController.xib in Resources */,
 				A8AAD1D013FE3AC2000B2032 /* chef_specials_toggle_active.png in Resources */,
 				A8AAD1D113FE3AC2000B2032 /* chef_specials_toggle_inactive.png in Resources */,
 				A8AAD1D813FE3AC2000B2032 /* featured_deals_toggle_active.png in Resources */,
@@ -1588,7 +1588,7 @@
 				AF67525113C8A2BA0008FE93 /* ReservationsViewController.m in Sources */,
 				AF67525613C8A2D60008FE93 /* AboutUsViewController.m in Sources */,
 				AF67525B13C8A2E80008FE93 /* ContactUsViewController.m in Sources */,
-				AF1ECEB313C8F2D3000A1D60 /* HomeViewController.m in Sources */,
+				AF1ECEB313C8F2D3000A1D60 /* DealsViewController.m in Sources */,
 				AF1ECEBF13C8F525000A1D60 /* SpecialTableViewCell.m in Sources */,
 				AF1ECED413C8F72D000A1D60 /* ApplicationManager.m in Sources */,
 				AF1ECED713C8F795000A1D60 /* DataCacheManager.m in Sources */,
@@ -1609,7 +1609,7 @@
 				A83A831713FA9FF2004BAF40 /* MenuTableViewCell.m in Sources */,
 				A8D3DB0513FB9BE500A132BA /* AboutUsTableViewCell.m in Sources */,
 				A8D3DB0C13FBBF4A00A132BA /* MyReviewViewController.m in Sources */,
-				A85E06D113FD623F00E4FED2 /* DealsViewController.m in Sources */,
+				A85E06D113FD623F00E4FED2 /* HomeViewController.m in Sources */,
 				A88D659B14026E6A009016E8 /* MapViewController.m in Sources */,
 				A88D65AA14027A80009016E8 /* MapViewAnnotation.m in Sources */,
 				A8C7DFD114077739005C3D8C /* SavedOrderViewController.m in Sources */,

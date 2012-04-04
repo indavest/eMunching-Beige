@@ -1,60 +1,61 @@
 //
-//  HomeViewController.m
+//  HomePageViewController.m
 //  eMunching
 //
-//  Created by Andrew Green on 7/9/11.
+//  Created by Ranjit Kadam on 16/08/11.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "HomeViewController.h"
+#import "DealsViewController.h"
 #import "MyOrderViewController.h"
-#import "SpecialTableViewCell.h"
-#import "MenuItemViewController.h"
-
-#import "Objects.h"
-#import "PLSegmentView.h"
-#import "FontLabel.h"
-#import "RoundCorneredUIImageView.h"
-
+#import "HomeViewController.h"
+#import "Reachability.h"
+#import "SignInViewController.h"
+#import "MyProfileViewController.h"
+#import "HotDealsViewController.h"
 
 @interface HomeViewController (PrivateMethods)
 
+- (void) getRestaurantLocations;
 - (void) displayMyOrder;
-- (void) getRestaurantMenuItems:(NSString *) dealType;
-- (void) startImageDownload:(MenuItem *)menuItem forIndexPath:(NSIndexPath *)indexPath;
+- (void) displayMyProfile;
+- (void) displayChefSpecial;
+- (void) displayFeaturedDeals;
+- (void) displayHotDeals;
 
 @end
 
 @implementation HomeViewController
 
-@synthesize specialSelector         = m_specialSelector;
-@synthesize currentSpecialsTable    = m_currentSpecialsTable;
+@synthesize scrollView     = m_scrollView;
+@synthesize logoImage      = m_logoImage;
+@synthesize specialsButton = m_specialsButton;
+@synthesize dealsButton    = m_dealsButton;
 
-@synthesize currentSpecials         = m_currentSpecials;
-@synthesize selectedDealType        = m_selectedDealType;
-
-@synthesize fetchedResults          = m_fetchedResults;
-@synthesize parsedCurrentSpecials   = m_parsedCurrentSpecials;
-@synthesize menuItem                = m_menuItem;
+@synthesize locationResults         = m_locationResults;
+@synthesize parsedLocations         = m_parsedLocations;
+@synthesize locationData            = m_locationData;
 @synthesize workingPropertyString   = m_workingPropertyString;
 @synthesize elementsToParse         = m_elementsToParse;
 @synthesize storingCharacterData    = m_storingCharacterData;
 
-@synthesize imageDownloadsInProgress = m_imageDownloadsInProgress;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
 
 - (void)dealloc
 {
-    [m_parsedCurrentSpecials release];
-    [m_menuItem release];
-    [m_workingPropertyString release];
-    [m_elementsToParse release];   
-    [m_statuslabel release];
-    
-    [m_currentSpecials release];
-    
-    [m_imageDownloadsInProgress release];
-    
     [super dealloc];
+    
+    [m_parsedLocations release];
+    [m_locationData release];
+    [m_elementsToParse release];
 }
 
 - (void)didReceiveMemoryWarning
@@ -63,9 +64,6 @@
     [super didReceiveMemoryWarning];
     
     // Release any cached data, images, etc that aren't in use.
-    // terminate all pending download connections
-    NSArray *allImageDownloads = [self.imageDownloadsInProgress allValues];
-    [allImageDownloads makeObjectsPerformSelector:@selector(cancelDownload)];
 }
 
 #pragma mark - View lifecycle
@@ -73,64 +71,104 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
     
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
+    [m_scrollView setScrollEnabled:YES];
+    [m_scrollView setContentSize:CGSizeMake(320,370)];
     
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    FontLabel *hiddenLabel;
+    hiddenLabel = [[FontLabel alloc] initWithFrame:CGRectMake(0, -75, 320, 60)];
+    hiddenLabel.backgroundColor = [UIColor clearColor];
+    hiddenLabel.textColor = [UIColor darkGrayColor];
+    hiddenLabel.textAlignment = UITextAlignmentCenter;
+    hiddenLabel.numberOfLines = 2;
+    hiddenLabel.text   = @"Powered By eMunching";
+    [hiddenLabel setZFont:[[ApplicationManager instance].fontManager zFontWithName:REGULARFONT pointSize:15.0f]];
+    [self.scrollView addSubview:hiddenLabel];
     
-    NSArray* imageNormalArray = [@"chef_specials_toggle_inactive.png featured_deals_toggle_inactive.png" componentsSeparatedByString:@" "];
-	NSArray* imageSelectedArray = [@"chef_specials_toggle_active.png featured_deals_toggle_active.png" componentsSeparatedByString:@" "];
+    [[[self navigationItem] rightBarButtonItem] setTarget:self];
+    [[[self navigationItem] rightBarButtonItem] setAction:@selector(displayMyOrder)];
+    [[[self navigationItem] leftBarButtonItem] setTarget:self];
+    [[[self navigationItem] leftBarButtonItem] setAction:@selector(displayMyProfile)];
     
-    
-	[m_specialSelector setupCellsByImagesName:imageNormalArray selectedImagesName:imageSelectedArray offset:CGSizeMake(160, 0)];
-    [m_specialSelector setSelectedIndex:m_selectedDealType];
-
-    [m_specialSelector setDelegate:self];
-    
-    m_statuslabel = [[FontLabel alloc] initWithFrame:CGRectMake(45, 160, 240, 60)];
-    m_statuslabel.backgroundColor = [UIColor clearColor];
-    m_statuslabel.textAlignment = UITextAlignmentCenter; // UITextAlignmentCenter, UITextAlignmentLeft
-    m_statuslabel.numberOfLines = 2;
-    m_statuslabel.text   = @"Sorry! no menu items found";
-    m_statuslabel.hidden = TRUE;
-    [m_statuslabel setTextColor:TEXTCOLOR1];
-    [m_statuslabel setZFont:[[ApplicationManager instance].fontManager zFontWithName:REGULARFONT pointSize:15.0f]];
-    [self.view addSubview:m_statuslabel];
-    
-    if (!m_selectedDealType)
-        [self getRestaurantMenuItems:@"1"];
-    else
-        [self getRestaurantMenuItems:@"2"];;
-
-    self.imageDownloadsInProgress = [NSMutableDictionary dictionary];
-    
-    //Add a My Order button to RightBarButtonItem
-    UIBarButtonItem *myOrderButton = [[UIBarButtonItem alloc] 
-                                      initWithTitle:@"My Order"                                            
-                                      style:UIBarButtonItemStyleBordered 
-                                      target:self 
-                                      action:@selector(displayMyOrder)];
-    
-    self.navigationItem.rightBarButtonItem = myOrderButton;
-    [myOrderButton release];
+    self.parsedLocations = [NSMutableArray array];
+    self.workingPropertyString = [NSMutableString string];
     
     self.elementsToParse = [NSMutableArray array];
-    [self.elementsToParse addObject:@"ID"];
-    [self.elementsToParse addObject:@"Item"];
-    [self.elementsToParse addObject:@"ItemDesc"];
-    [self.elementsToParse addObject:@"ItemPrice"];
-    [self.elementsToParse addObject:@"DiscountPrice"];
-    [self.elementsToParse addObject:@"ItemImage1"];
-    [self.elementsToParse addObject:@"ItemImage2"];
-    [self.elementsToParse addObject:@"ItemImage3"];
+    [self.elementsToParse addObject:@"LocaID"];
+    [self.elementsToParse addObject:@"LName"];
+    [self.elementsToParse addObject:@"StreetAddress"];
+    [self.elementsToParse addObject:@"City"];
+    [self.elementsToParse addObject:@"Region"];
+    [self.elementsToParse addObject:@"Country"];
+    [self.elementsToParse addObject:@"Latitude"];
+    [self.elementsToParse addObject:@"Longitude"];
+    [self.elementsToParse addObject:@"PhoneNumber"];
+    [self.elementsToParse addObject:@"EmailAddress"];
+    [self.elementsToParse addObject:@"WebSite"];
+    [self.elementsToParse addObject:@"FacebookUrl"];
+    [self.elementsToParse addObject:@"TwitterHandle"];
+    [self.elementsToParse addObject:@"HoursOfOperation"];
+    [self.elementsToParse addObject:@"MultipleMenus"];
     
     //Set colors from templates
     [self.view setBackgroundColor:BACKGROUNDCOLOR];
-    [m_currentSpecialsTable setBackgroundColor:BACKGROUNDCOLOR];
-    [m_specialSelector setBackgroundColor:BACKGROUNDCOLOR];
+    [m_scrollView setBackgroundColor:BACKGROUNDCOLOR];     
     [self.navigationController.navigationBar setTintColor:TINTCOLOR];   
+}
+
+-(void)viewDidAppear:(BOOL)animated
+{
+    [self getRestaurantLocations];
+    
+    NSError *error;
+    [[GANTracker sharedTracker] trackPageview:@"Home" withError:&error];
+}
+
+- (IBAction) handleButton:(id)sender
+{
+    UIButton *button = (UIButton*)sender;
+    int tag = [button tag];
+    
+    switch (tag)
+    {
+        case BUTTON_CHEFSPECIAL:
+            [self displayChefSpecial];
+            break;
+        case BUTTON_FEATUREDDEAL:
+            [self displayFeaturedDeals];
+            break;
+        case BUTTON_HOTDEALS:
+            [self displayHotDeals]; 
+            break;
+        default:
+            break;
+    }
+}
+
+
+-(void) displayChefSpecial
+{
+    
+    DealsViewController *dealsView =[[DealsViewController alloc]initWithNibName:@"DealsView" bundle:nil];
+    [dealsView setSelectedDealType:0];
+    [self.navigationController pushViewController:dealsView animated:YES]; 
+    
+}
+
+-(void) displayFeaturedDeals
+{
+    
+    DealsViewController *dealsView =[[DealsViewController alloc]initWithNibName:@"DealsView" bundle:nil];
+    [dealsView setSelectedDealType:1];
+    [self.navigationController pushViewController:dealsView animated:YES]; 
+    
+}
+
+-(void) displayHotDeals
+{
+    HotDealsViewController *hotDealsView =[[HotDealsViewController alloc]initWithNibName:@"HotDealsViewController" bundle:nil];
+    [self.navigationController pushViewController:hotDealsView animated:YES]; 
 }
 
 - (void) displayMyOrder
@@ -139,134 +177,142 @@
     [self presentModalViewController:(UIViewController*)[[ApplicationManager instance].uiManager orderController] animated:YES];
 }
 
-- (void) getRestaurantMenuItems:(NSString *) dealType
+- (void) displayMyProfile
 {
-    m_statuslabel.hidden = TRUE;
-    
-    // Control the number of synch calls made to server for chef specials and featured deals
-    // Get data from server only after an interval of x(refer DataCacheManager) calls to the cache manager
+    if ([[ApplicationManager instance].dataCacheManager loginStatus] == FALSE)
+    {
+        SignInViewController *signIn =[[SignInViewController alloc]initWithNibName:@"SignInViewController" bundle:nil];
+        [self presentModalViewController:signIn animated:YES];
+    }
+    else
+    {
+        MyProfileViewController *MyProfileView =[[MyProfileViewController alloc]initWithNibName:@"MyProfileViewController" bundle:nil];
+        [self.navigationController pushViewController:MyProfileView animated:YES]; 
+    }
+}
 
-    if ([[ApplicationManager instance].dataCacheManager getDealsSynchStatus:m_selectedDealType] == FALSE)
+- (void)viewDidUnload
+{
+    [super viewDidUnload];
+    // Release any retained subviews of the main view.
+    // e.g. self.myOutlet = nil;
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+-(void)getRestaurantLocations
+{    
+    // Control the number of synch calls made to server for each menu item group
+    // Get data from server only after an interval of x(refer DataCacheManager) calls to the cache manager
+    
+    if ([[ApplicationManager instance].dataCacheManager getLocationsSynchStatus] == FALSE)
     {
         return;
     }
     
-    //Start an activity indicator before the data is loaded from server
-    m_activityIndicator =[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(20.0f, 20.0f, 40.0f, 40.0f)];
-    [m_activityIndicator setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhiteLarge];
-    m_activityIndicator.center = self.view.center;
-    [self.view addSubview:m_activityIndicator];
-    [m_activityIndicator startAnimating];
-    
-    [m_specialSelector setUserInteractionEnabled:FALSE];
-
-    
-    self.parsedCurrentSpecials = [NSMutableArray array];
-    self.workingPropertyString = [NSMutableString string];
+    Reachability *reachability = [Reachability reachabilityForInternetConnection];  
+    NetworkStatus networkStatus = [reachability currentReachabilityStatus]; 
+    if (networkStatus == NotReachable)
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:@"Please check your data connection and try again" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];
+        [alert release];
+        
+        return;
+    }
     
     NSString *soapMessage =[NSString stringWithFormat:@"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-    "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n"
-    "<soap:Body>\n"
-    "<GetRestaurantMenuItemsAll_XML xmlns=\"http://emunching.org/\">\n"
-    "<UserName>eMunch</UserName>\n"
-    "<PassWord>idnlgeah11</PassWord>\n"
-    "<RestaurantID>%i</RestaurantID>\n"
-    "<MealType>0</MealType>\n"
-    "<DealType>%@</DealType>\n"
-    "<MenuItemType>0</MenuItemType>\n"
-    "<MealCategory>0</MealCategory>\n"   
-    "</GetRestaurantMenuItemsAll_XML>\n"
-    "</soap:Body>\n"
-    "</soap:Envelope>\n", RESTAURANT_ID, dealType];
+                            "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n"
+                            "<soap:Body>\n"
+                            "<GetRestaurantLocations_XML xmlns=\"http://emunching.org/\">\n"
+                            "<UserName>eMunch</UserName>\n"
+                            "<PassWord>idnlgeah11</PassWord>\n"
+                            "<RestaurantID>%i</RestaurantID>\n" 
+                            "</GetRestaurantLocations_XML>\n"
+                            "</soap:Body>\n"
+                            "</soap:Envelope>\n",RESTAURANT_ID];
     
-//    NSString *soapMessage = @"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-//                            "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n"
-//                            "<soap:Body>\n"
-//                            "<GetRestaurantMenuItemsAll_XML xmlns=\"http://emunching.org/\">\n"
-//                            "<UserName>eMunch</UserName>\n"
-//                            "<PassWord>idnlgeah11</PassWord>\n"
-//                            "<RestaurantID>5</RestaurantID>\n"
-//                            "<DealType>0</DealType>\n"
-//                            "<MenuItemType>0</MenuItemType>\n"
-//                            "<MealCategory>0</MealCategory>\n"   
-//                            "</GetRestaurantMenuItemsAll_XML>\n"
-//                            "</soap:Body>\n"
-//                            "</soap:Envelope>\n";
     
     NSURL *url = [NSURL URLWithString:@"http://www.emunching.com/eMunchingServices.asmx"];
     NSMutableURLRequest *theRequest = [NSMutableURLRequest requestWithURL:url];
     NSString *msgLength = [NSString stringWithFormat:@"%d", [soapMessage length]];
     
     [theRequest addValue: @"text/xml; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
-    [theRequest addValue: @"http://emunching.org/GetRestaurantMenuItemsAll_XML" forHTTPHeaderField:@"SOAPAction"];
+    [theRequest addValue: @"http://emunching.org/GetRestaurantLocations_XML" forHTTPHeaderField:@"SOAPAction"];
     [theRequest addValue: msgLength forHTTPHeaderField:@"Content-Length"];
     [theRequest setHTTPMethod:@"POST"];
     [theRequest setHTTPBody: [soapMessage dataUsingEncoding:NSUTF8StringEncoding]];
+    
     
     NSURLConnection *theConnection = [[NSURLConnection alloc] initWithRequest:theRequest delegate:self];
     
     if( theConnection )
     {
-        m_fetchedResults = [[NSMutableData data] retain];
+        m_locationResults = [[NSMutableData data] retain];
     }
     else
     {
         NSLog(@"theConnection is NULL");
     }
-    
+}
+
+-(void) connection:(NSURLConnection *) connection 
+didReceiveResponse:(NSURLResponse *) response 
+{
+    [m_locationResults setLength: 0];
 }
 
 
 -(void) connection:(NSURLConnection *) connection 
-didReceiveResponse:(NSURLResponse *) response {
-    [m_fetchedResults setLength: 0];
-}
-
-
--(void) connection:(NSURLConnection *) connection 
-    didReceiveData:(NSData *) data {
-    [m_fetchedResults appendData:data];
+    didReceiveData:(NSData *) data 
+{
+    [m_locationResults appendData:data];
 }
 
 -(void) connection:(NSURLConnection *) connection 
-  didFailWithError:(NSError *) error {
-    [m_fetchedResults release];
+  didFailWithError:(NSError *) error 
+{
+    [m_locationResults release];
     [connection release];
 }
 
--(void) connectionDidFinishLoading:(NSURLConnection *) connection {
+-(void) connectionDidFinishLoading:(NSURLConnection *) connection 
+{
     
-    NSLog(@"DONE. Received Bytes: %d", [m_fetchedResults length]);
+    NSLog(@"DONE. Received Bytes: %d", [m_locationResults length]);
     
     NSString *theXML = [[NSString alloc] 
-                        initWithBytes: [m_fetchedResults mutableBytes] 
-                        length:[m_fetchedResults length] 
+                        initWithBytes: [m_locationResults mutableBytes] 
+                        length:[m_locationResults length] 
                         encoding:NSUTF8StringEncoding];
     
     //---shows the XML---
     NSLog(@"%@",theXML);
     
     [theXML release];  
-        
-    NSXMLParser *parser = [[[NSXMLParser alloc] initWithData:m_fetchedResults]autorelease];
-	[parser setDelegate:self];
+    
+    [m_parsedLocations removeAllObjects];
+    
+    NSXMLParser *parser = [[[NSXMLParser alloc] initWithData:m_locationResults]autorelease];
+    [parser setDelegate:self];
     [parser parse];
-	
+    
     [connection release];
-    [m_fetchedResults release];
+    [m_locationResults release];
 }
-
-#pragma mark -
-#pragma mark RSS processing
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName
   namespaceURI:(NSString *)namespaceURI
  qualifiedName:(NSString *)qName
     attributes:(NSDictionary *)attributeDict
 {
-    if ([elementName isEqualToString:@"MenuItem"])
-	{
-        self.menuItem = [[[MenuItem alloc] init] autorelease];
+    if ([elementName isEqualToString:@"Location"])
+    {
+        self.locationData = [[[Location alloc] init] autorelease];
     }
     
     m_storingCharacterData = [m_elementsToParse containsObject:elementName];
@@ -276,61 +322,86 @@ didReceiveResponse:(NSURLResponse *) response {
   namespaceURI:(NSString *)namespaceURI
  qualifiedName:(NSString *)qName
 {
-    if (self.menuItem)
-	{
+    if (self.locationData)
+    {
         if (m_storingCharacterData)
         {
             NSString *trimmedString = [m_workingPropertyString stringByTrimmingCharactersInSet:
                                        [NSCharacterSet whitespaceAndNewlineCharacterSet]];
             [m_workingPropertyString setString:@""];  // clear the string for next time
-            if ([elementName isEqualToString:@"ID"])
+            if ([elementName isEqualToString:@"LocaID"])
             {
-                self.menuItem.dishId = trimmedString;
-            }     
-            else if ([elementName isEqualToString:@"Item"])
+                self.locationData.locationId = trimmedString;
+            }
+            else if ([elementName isEqualToString:@"LName"])
             {
-                self.menuItem.dishTitle = trimmedString;
+                self.locationData.locationName = trimmedString;
             }
-            else if ([elementName isEqualToString:@"ItemDesc"])
-            {        
-                self.menuItem.dishDescription = trimmedString;
-            }
-            else if ([elementName isEqualToString:@"ItemPrice"])
+            else if ([elementName isEqualToString:@"StreetAddress"])
             {
-                self.menuItem.dishPrice = trimmedString;
+                self.locationData.locationStreetAddress = trimmedString;
             }
-            else if ([elementName isEqualToString:@"DiscountPrice"])
+            else if ([elementName isEqualToString:@"City"])
             {
-                self.menuItem.dishDiscountPrice = trimmedString;
+                self.locationData.locationCity = trimmedString;
             }
-            else if ([elementName isEqualToString:@"ItemImage1"])
+            else if ([elementName isEqualToString:@"Region"])
             {
-                self.menuItem.dishPictureURLString   = trimmedString;
+                self.locationData.locationRegion = trimmedString;
             }
-            else if ([elementName isEqualToString:@"ItemImage2"])
+            else if ([elementName isEqualToString:@"Country"])
             {
-                [self.menuItem.dishPictureURLStrings addObject:trimmedString];
+                self.locationData.locationCountry = trimmedString;
             }
-            else if ([elementName isEqualToString:@"ItemImage3"])
+            else if ([elementName isEqualToString:@"Latitude"])
             {
-                [self.menuItem.dishPictureURLStrings addObject:trimmedString];
+                self.locationData.locationLatitiude = trimmedString;
             }
-        }
+            else if ([elementName isEqualToString:@"Longitude"])
+            {
+                self.locationData.locationLongitude = trimmedString;
+            }
+            else if ([elementName isEqualToString:@"PhoneNumber"])
+            {
+                self.locationData.locationPhoneNumber = trimmedString;
+            }
+            else if ([elementName isEqualToString:@"EmailAddress"])
+            {
+                self.locationData.locationEmailAddress = trimmedString;
+            }
+            else if ([elementName isEqualToString:@"WebSite"])
+            {
+                self.locationData.locationWebSite = trimmedString;
+            }
+            else if ([elementName isEqualToString:@"FacebookUrl"])
+            {
+                self.locationData.locationFacebookUrl = trimmedString;
+            }
+            else if ([elementName isEqualToString:@"TwitterHandle"])
+            {
+                self.locationData.locationTwitterUrl = trimmedString;
+            }
+            else if ([elementName isEqualToString:@"HoursOfOperation"])
+            {
+                self.locationData.locationHoursOfOperation = trimmedString;
+            }
+            else if ([elementName isEqualToString:@"MultipleMenus"])
+            {
+                self.locationData.multipleMenuStatus = trimmedString;
+            }
+         }
         
-        if ([elementName isEqualToString:@"MenuItem"])
+        if ([elementName isEqualToString:@"Location"])
         {
-            [self.parsedCurrentSpecials addObject:self.menuItem];  
+            [self.parsedLocations addObject:self.locationData];  
         }
     }
-    
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
 {
     if (m_storingCharacterData)
-    {
         [m_workingPropertyString appendString:string];
-    }
 }
 
 - (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError
@@ -338,336 +409,29 @@ didReceiveResponse:(NSURLResponse *) response {
     // Check if parserDidEndDocument is called after parse error
     // If not, do the same actions as parserDidEndDocument
     
-    m_statuslabel.hidden = FALSE;
+    //m_statuslabel.hidden = FALSE;
 }
-
 
 -(void)parserDidEndDocument:(NSXMLParser *)parser
 {
-    if ([m_parsedCurrentSpecials count])
+    if ([m_parsedLocations count])
     {
-        if (!m_selectedDealType)
-            [[ApplicationManager instance].dataCacheManager setChefSpecials:m_parsedCurrentSpecials];
-        else
-            [[ApplicationManager instance].dataCacheManager setFeaturedDeals:m_parsedCurrentSpecials];
-    }
-    
-    [[self currentSpecialsTable] reloadData];
-
-    if ([m_parsedCurrentSpecials count])
-        m_statuslabel.hidden = TRUE;
-    else
-        m_statuslabel.hidden = FALSE;
-    
-    [m_activityIndicator stopAnimating];
-    m_activityIndicator.hidden = YES;
-    [m_activityIndicator release];
-    
-    [m_specialSelector setUserInteractionEnabled:TRUE];
-}
-
-
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-}
-
-- (void)viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    
-    NSError *error;
-    [[GANTracker sharedTracker] trackPageview:@"Deals" withError:&error];
-}
-
-- (void)viewWillDisappear:(BOOL)animated
-{
-    [super viewWillDisappear:animated];
-}
-
-- (void)viewDidDisappear:(BOOL)animated
-{
-    [super viewDidDisappear:animated];
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
-
-#pragma mark - Table view data source
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
-{
-    // Return the number of sections.
-    return 1;
-}
-
-- (CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    return 115.0f;
-}
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    [m_currentSpecials release];
-    
-    // Return the number of rows in the section.
-    switch ([m_specialSelector selectedIndex])
-    {
-        case CHEFSPECIALS:
-            m_currentSpecials = [[NSMutableArray alloc] initWithArray:[[ApplicationManager instance].dataCacheManager chefSpecials]];
-            break;
-       
-        case DAILYDEALS:
-            m_currentSpecials = [[NSMutableArray alloc] initWithArray:[[ApplicationManager instance].dataCacheManager featuredDeals]];
-            break;
+        [[ApplicationManager instance].dataCacheManager setLocations:m_parsedLocations];
         
-        default:
-            break;
-    }
-    
-    return [m_currentSpecials count];
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    
-    NSString *CellIdentifier = [NSString stringWithFormat:@"Cell%i%i",[indexPath section],[indexPath row]];
-    
-    // Configure the cell...
-    SpecialTableViewCell *tableCell = [[SpecialTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
-    
-    NSArray *topLevelObjects = [[NSBundle mainBundle] loadNibNamed:@"SpecialTableViewCell" owner:nil options:nil];
-    
-    for(id currentObject in topLevelObjects)
-    {
-        if([currentObject isKindOfClass:[SpecialTableViewCell class]])
+        Location *location = [m_parsedLocations objectAtIndex:0];
+        [[ApplicationManager instance].dataCacheManager setPreferredLocation:location];
+        
+        NSString *prefLoc = [[ApplicationManager instance].dataCacheManager prefLocationId];
+        for(int i=0;i<[m_parsedLocations count];i++)
         {
-            tableCell = (SpecialTableViewCell*)currentObject;
-            break;
-        }
-    }
-            
-    m_menuImageHeight = tableCell.specialImage.frame.size.height;
-    m_menuImageWidth  = tableCell.specialImage.frame.size.width;
-   
-       
-    MenuItem *currentSpecial = [m_currentSpecials objectAtIndex:[indexPath row]];
-    
-    [[tableCell specialImage] roundEdgesToRadius:10];
-    [[tableCell specialTitle] setText:[currentSpecial dishTitle]];
-    [[tableCell specialTitle] setTextColor:TEXTCOLOR1];
-    [[tableCell specialTitle] setZFont:[[ApplicationManager instance].fontManager zFontWithName:BOLDFONT pointSize:18.0f]];
-    [[tableCell specialDescription] setText:[currentSpecial dishDescription]];
-    [[tableCell specialDescription] setTextColor:TEXTCOLOR1];
-    [[tableCell specialDescription] setZFont:[[ApplicationManager instance].fontManager zFontWithName:REGULARFONT pointSize:13.0f]];
-    
-    [tableCell setSelectionStyle:UITableViewCellSelectionStyleNone];
-    
-    if (!(([indexPath row] % 2) == 0))
-    {
-        [tableCell reverseLocations];
-    }
-    
-    if (!currentSpecial.dishPicture)
-    {
-        if (self.currentSpecialsTable.dragging == NO && self.currentSpecialsTable.decelerating == NO)
-        {
-            [self startImageDownload:currentSpecial  forIndexPath:indexPath];
-        }
-        // if a download is deferred or in progress, return a placeholder image
-        [[tableCell specialImage] setImage:[UIImage imageNamed:@"blank_loading.png"]];
-    }
-    else
-    {
-         [[tableCell specialImage] setImage:currentSpecial.dishPicture];
-    }
-    
-   
-    return tableCell;
-}
-
-/*
- // Override to support conditional editing of the table view.
- - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
- {
- // Return NO if you do not want the specified item to be editable.
- return YES;
- }
- */
-
-/*
- // Override to support editing the table view.
- - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
- {
- if (editingStyle == UITableViewCellEditingStyleDelete) {
- // Delete the row from the data source
- [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
- }   
- else if (editingStyle == UITableViewCellEditingStyleInsert) {
- // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
- }   
- }
- */
-
-/*
- // Override to support rearranging the table view.
- - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
- {
- }
- */
-
-/*
- // Override to support conditional rearranging of the table view.
- - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
- {
- // Return NO if you do not want the item to be re-orderable.
- return YES;
- }
- */
-
-#pragma mark - Table view delegate
-
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    
-    MenuItem *selectedSpecial = [m_currentSpecials objectAtIndex:[indexPath row]];
-    
-    // Navigation logic may go here. Create and push another view controller.
-    MenuItemViewController *selectedMenuItem = [[MenuItemViewController alloc] initWithNibName:@"MenuItemView" bundle:nil];
-    
-    [selectedMenuItem setMenuItem:selectedSpecial];	
-    
-    if (m_selectedDealType == 0)
-        [selectedMenuItem setCacheArrayToUpdate:@"ChefSpecials"];
-    else
-        [selectedMenuItem setCacheArrayToUpdate:@"FeaturedDeals"];
-    
-    [selectedMenuItem setSelectedItemIndex:[indexPath row]];
-    
-    
-    // ...
-    // Pass the selected object to the new view controller.
-    [self.navigationController pushViewController:selectedMenuItem animated:YES]; 
-    
-    [selectedMenuItem release];
-}
-
-#pragma mark -
-#pragma mark Selector
-
-- (void)segmentClickedAtIndex:(int)index onCurrentCell:(BOOL)isCurrent
-{
-    m_statuslabel.hidden = TRUE;
-    
-    NSArray *allImageDownloads = [self.imageDownloadsInProgress allValues];
-    [allImageDownloads makeObjectsPerformSelector:@selector(cancelDownload)];
-    [self.imageDownloadsInProgress removeAllObjects];
-    
-    m_selectedDealType = index;
-    if (index)
-        [self getRestaurantMenuItems:@"2"];
-    else
-        [self getRestaurantMenuItems:@"1"];
-        
-    [[self currentSpecialsTable] reloadData];
-    
-}
-
-#pragma mark -
-#pragma mark Button Handlers
-
-
-- (void) displaySearch
-{
-    
-}
-
-#pragma mark -
-#pragma mark Table cell image support
-
-- (void)startImageDownload:(MenuItem *)menuItem forIndexPath:(NSIndexPath *)indexPath
-{
-    ImageDownloader *imageDownloader = [m_imageDownloadsInProgress objectForKey:indexPath];
-    if (imageDownloader == nil) 
-    {
-        imageDownloader = [[ImageDownloader alloc] init];
-        [m_imageDownloadsInProgress setObject:imageDownloader forKey:indexPath];
-        
-        imageDownloader.indexPathInTableView = indexPath;
-        imageDownloader.delegate = self;
-        
-        MenuItem *currentSpecial = [m_currentSpecials objectAtIndex:[indexPath row]];
-        [imageDownloader setImageURLString:currentSpecial.dishPictureURLString];
-        [imageDownloader setImageHeight:m_menuImageHeight];
-        [imageDownloader setImageWidth:m_menuImageWidth];
-        
-        [imageDownloader startDownload];
-        [imageDownloader release];   
-    }
-}
-
-// this method is used in case the user scrolled into a set of cells that don't have their app icons yet
-- (void)loadImagesForOnscreenRows
-{
-    if ([self.currentSpecials count] > 0)
-    {
-        NSArray *visiblePaths = [self.currentSpecialsTable indexPathsForVisibleRows];
-        for (NSIndexPath *indexPath in visiblePaths)
-        {
-            MenuItem *menuItem = [self.currentSpecials objectAtIndex:indexPath.row];
-            
-            if (!menuItem.dishPicture) // avoid the app icon download if the app already has an icon
+            if ([prefLoc isEqualToString:[[m_parsedLocations objectAtIndex:i] locationId]])
             {
-                [self startImageDownload:menuItem forIndexPath:indexPath];
+                Location *preflocation = [m_parsedLocations objectAtIndex:i];
+                [[ApplicationManager instance].dataCacheManager setPreferredLocation:preflocation];
             }
         }
     }
 }
 
-// called by ImageDownloader when an image is ready to be displayed
-- (void)appImageDidLoad:(NSIndexPath *)indexPath
-{
-    ImageDownloader *imageDownloader = [m_imageDownloadsInProgress objectForKey:indexPath];
-    if (imageDownloader != nil && imageDownloader.returnedImage != nil)
-    {
-       
-        SpecialTableViewCell *tableCell = (SpecialTableViewCell *)[self.currentSpecialsTable cellForRowAtIndexPath:imageDownloader.indexPathInTableView];
-        
-        // Display the newly loaded image
-        [[tableCell specialImage] setImage :imageDownloader.returnedImage];
-        
-        [[m_currentSpecials objectAtIndex:indexPath.row] setDishPicture:imageDownloader.returnedImage];
-    }
-    
-}
-
-
-#pragma mark -
-#pragma mark Deferred image loading (UIScrollViewDelegate)
-
-// Load images for all onscreen rows when scrolling is finished
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
-{
-    if (!decelerate)
-	{
-        [self loadImagesForOnscreenRows];
-    }
-}
-
-- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
-{
-    [self loadImagesForOnscreenRows];
-}
 
 @end
-

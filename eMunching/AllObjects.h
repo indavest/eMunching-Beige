@@ -34,6 +34,9 @@
 @property (nonatomic, retain) NSMutableArray *dishPictureURLStrings;
 @property (nonatomic, retain) NSMutableArray *dishPictures;
 
+
+- (bool) isMenuItemOk;
+
 @end
 
 

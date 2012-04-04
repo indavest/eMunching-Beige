@@ -1,5 +1,5 @@
 //
-//  DealsViewController.m
+//  ReservationViewController.m
 //  eMunching
 //
 //  Created by Andrew Green on 7/9/11.

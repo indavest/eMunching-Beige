@@ -70,6 +70,18 @@
     [m_dishPictures release];
 }
 
+- (bool) isMenuItemOk
+{
+    if ([m_dishId length] && [m_dishTitle length] && [m_dishPrice length])
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 @end
 
 
