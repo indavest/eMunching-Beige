@@ -62,47 +62,66 @@
         {
             Location *location = [restlocations objectAtIndex:i];
             
-            float latitude = [[location locationLatitiude]floatValue];
+            float latitude  = [[location locationLatitiude]floatValue];
             float longitude = [[location locationLongitude]floatValue];
             
-            CLLocationCoordinate2D Coordinate;
-            Coordinate.latitude  = latitude;
-            Coordinate.longitude = longitude;
             
-            MapViewAnnotation* annotation=[[MapViewAnnotation alloc] init];
-            
-            annotation.coordinate = Coordinate;
-            annotation.title    = [location locationName];
-            annotation.subtitle = [location locationRegion];
-            
-            [m_mapView addAnnotation:annotation];
-            [annotations addObject:annotation];
-        }
-        
-        
-        
-        NSLog(@"%d",[annotations count]);
-        //[self gotoLocation];//to catch perticular area on screen
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem;
-        
-        // Walk the list of overlays and annotations and create a MKMapRect that
-        // bounds all of them and store it into flyTo.
-        MKMapRect flyTo = MKMapRectNull;
-        for (id <MKAnnotation> annotation in annotations) {
-            NSLog(@"fly to on");
-            MKMapPoint annotationPoint = MKMapPointForCoordinate(annotation.coordinate);
-            MKMapRect pointRect = MKMapRectMake(annotationPoint.x, annotationPoint.y, 0, 0);
-            if (MKMapRectIsNull(flyTo)) {
-                flyTo = pointRect;
-            } else {
-                flyTo = MKMapRectUnion(flyTo, pointRect);
-                //NSLog(@"else-%@",annotationPoint.x);
+            if([restlocations count] == 1)
+            {           
+                MKCoordinateRegion region;
+                region.center.latitude  = latitude;
+                region.center.longitude = longitude;
+                
+                region.span.latitudeDelta = 0.112872;
+                region.span.longitudeDelta = 0.109863;
+                
+                [m_mapView setRegion:region animated:YES];
+                
+                MapViewAnnotation *annotation = [[MapViewAnnotation alloc] init];
+                annotation.title    = [location locationName];
+                annotation.subtitle = [location locationRegion];           
+                annotation.coordinate = region.center;
+                [m_mapView addAnnotation:annotation];
+            }
+            else
+            {    
+                CLLocationCoordinate2D Coordinate;
+                Coordinate.latitude  = latitude;
+                Coordinate.longitude = longitude;
+                
+                
+                MapViewAnnotation* annotation=[[MapViewAnnotation alloc] init];
+                
+                annotation.coordinate = Coordinate;
+                annotation.title    = [location locationName];
+                annotation.subtitle = [location locationRegion];
+                
+                [m_mapView addAnnotation:annotation];
+                [annotations addObject:annotation];      
+                
+                
+                //[self gotoLocation];//to catch perticular area on screen
+                // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
+                // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+                
+                // Walk the list of overlays and annotations and create a MKMapRect that
+                // bounds all of them and store it into flyTo.
+                MKMapRect flyTo = MKMapRectNull;
+                for (id <MKAnnotation> annotation in annotations) {
+                    NSLog(@"fly to on");
+                    MKMapPoint annotationPoint = MKMapPointForCoordinate(annotation.coordinate);
+                    MKMapRect pointRect = MKMapRectMake(annotationPoint.x, annotationPoint.y, 0, 0);
+                    if (MKMapRectIsNull(flyTo)) {
+                        flyTo = pointRect;
+                    } else {
+                        flyTo = MKMapRectUnion(flyTo, pointRect);                        
+                    }
+                }
+                
+                // Position the map so that all overlays and annotations are visible on screen.
+                m_mapView.visibleMapRect = flyTo;
             }
         }
-        
-        // Position the map so that all overlays and annotations are visible on screen.
-        m_mapView.visibleMapRect = flyTo;
     }
     else
     {
@@ -113,11 +132,11 @@
         
         Location *prefLocation = [[ApplicationManager instance].dataCacheManager preferredLocation];
         
-        float latitiude = [[prefLocation locationLatitiude]floatValue];
+        float latitude = [[prefLocation locationLatitiude]floatValue];
         float longitude = [[prefLocation locationLongitude]floatValue];
         
         MKCoordinateRegion region;
-        region.center.latitude  = latitiude;
+        region.center.latitude  = latitude;
         region.center.longitude = longitude;
         
         region.span.latitudeDelta = 0.112872;
@@ -131,7 +150,7 @@
         
         annotation.coordinate = region.center;
         [m_mapView addAnnotation:annotation];
-  }  
+    }  
     
 }
 
@@ -153,13 +172,14 @@
         if(pinView == nil)
         {
             pinView =[[[MKPinAnnotationView alloc]initWithAnnotation:annotation reuseIdentifier:defaultID]autorelease];
-            pinView.pinColor =MKPinAnnotationColorGreen;
+            pinView.pinColor = MKPinAnnotationColorRed;
             pinView.canShowCallout = YES;
             pinView.animatesDrop = YES;
         }
     }              
 
-    return 0;
+    return pinView;
+   
 }
 
 - (void)viewDidUnload
