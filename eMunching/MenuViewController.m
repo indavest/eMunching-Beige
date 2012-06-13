@@ -221,7 +221,8 @@ didReceiveResponse:(NSURLResponse *) response {
     
     [theXML release];  
     
-    //[m_parsedMenuGroups removeAllObjects];
+    [m_parsedMenuGroups removeAllObjects];
+    [m_groupImageDownloadsInProgress removeAllObjects];
     
     NSXMLParser *parser = [[[NSXMLParser alloc] initWithData:m_fetchedResults]autorelease];
 	[parser setDelegate:self];

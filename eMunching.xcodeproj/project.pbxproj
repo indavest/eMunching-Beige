@@ -393,7 +393,7 @@
 		AF11F09A13C90DA3002FA85B /* PLSegmentCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PLSegmentCell.m; sourceTree = "<group>"; };
 		AF11F09B13C90DA3002FA85B /* PLSegmentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PLSegmentView.h; sourceTree = "<group>"; };
 		AF11F09C13C90DA3002FA85B /* PLSegmentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PLSegmentView.m; sourceTree = "<group>"; };
-		AF1ECEB013C8F2D3000A1D60 /* DealsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; path = DealsViewController.h; sourceTree = "<group>"; };
+		AF1ECEB013C8F2D3000A1D60 /* DealsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DealsViewController.h; sourceTree = "<group>"; };
 		AF1ECEB113C8F2D3000A1D60 /* DealsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DealsViewController.m; sourceTree = "<group>"; };
 		AF1ECEB213C8F2D3000A1D60 /* DealsView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DealsView.xib; sourceTree = "<group>"; };
 		AF1ECEBC13C8F525000A1D60 /* SpecialTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpecialTableViewCell.h; sourceTree = "<group>"; };
@@ -1741,7 +1741,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Ranjit Kadam (EZCQQ48U69)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Ranjit Kadam (EZCQQ48U69)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1755,6 +1755,7 @@
 					"\"$(SRCROOT)/eMunching\"",
 				);
 				PRODUCT_NAME = Besito;
+				PROVISIONING_PROFILE = "4D607B4D-18E7-43D7-A385-F275DD50BFC8";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "4D607B4D-18E7-43D7-A385-F275DD50BFC8";
 				WRAPPER_EXTENSION = app;
 			};
@@ -1768,7 +1769,7 @@
 					"'armv6'",
 					"'armv7'",
 				);
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Ranjit Kadam (EZCQQ48U69)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Ranjit Kadam (EZCQQ48U69)";
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1781,6 +1782,7 @@
 					"\"$(SRCROOT)/eMunching\"",
 				);
 				PRODUCT_NAME = Besito;
+				PROVISIONING_PROFILE = "4D607B4D-18E7-43D7-A385-F275DD50BFC8";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "4D607B4D-18E7-43D7-A385-F275DD50BFC8";
 				VALIDATE_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
